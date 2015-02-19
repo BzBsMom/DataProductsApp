@@ -1,0 +1,58 @@
+---
+title: "Exploratory"
+author: "MD"
+date: "February 12, 2015"
+output: html_document
+---
+Read all the records
+```{r}
+setwd("../Data")
+datafem<-read.csv("fem_todos_.csv",sep=";")
+datamasc<-read.csv("masc_todos_.csv",sep=";")
+head(datafem)
+```
+
+It is important to notice that the comma is used instead of the decimal point in the columns bmi,SBP, and DBP so it is important to convert to the appropiate character.
+```{r}
+summary(datafem)
+str(datafem)
+summary(datamasc)
+str(datamasc)
+homoname<-names(datafem)
+homoname[10]<-"hyper"
+names(datafem)<-homoname
+datall<-rbind(datafem,datamasc)
+datall$bmi<-as.numeric(datall$bmi)
+datall$SBP<-as.numeric(datall$SBP)
+datall$DBP<-as.numeric(datall$DBP)
+datall$DBP<-as.factor(round(datall$DBP))
+datall$bmi<-as.factor(round(datall$bmi))
+library(caret)
+nzv<-nearZeroVar(datall,saveMetrics=TRUE)
+```
+
+With this information I noticed that the data is clean and doesn't include NA or missing information.
+I decided to merge the information of men and women and homegeneize the name of the columns.
+The objective is to predict the systolic BP. The near zero values show that all the variables are meaningful for prediction
+
+```{r}
+set.seed(1000)
+indx<-createDataPartition(y=datall$SBP,p=0.7,list=FALSE)
+trainingM<-datall[indx,]
+testingM<-datall[-indx,]
+```
+Fit a model using random forest to predict SBP base on Age bmi and Diastolic BP.
+```{r}
+set.seed(1000)
+modfit2<-train(SBP ~ Age + bmi+ DBP,method="rf",prox=TRUE,data=trainingM,ntree=15)
+Ptest2<-predict(modfit2,testingM)
+predvec<-testingM[1,]
+predvec$Age<-50
+predvec$bmi<-30
+predvec$DBP<-90
+predvec$bmi<-as.factor(predvec$bmi)
+predvec$DBP<-as.factor(predvec$DBP)
+pres<-predict(modfit2,predvec)
+print (pres)
+```
+
