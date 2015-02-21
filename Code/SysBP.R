@@ -17,6 +17,6 @@ predSBP<-function (ShAge,Shbmi,ShDBP){
      return(Ptest2[1])
 }
 
-print (predSBP(80,40,90))
-print (predSBP(50,30,90))
-print (predSBP(60,20,90))
+#print (predSBP(80,40,90))
+#print (predSBP(50,30,90))
+#print (predSBP(60,20,90))
